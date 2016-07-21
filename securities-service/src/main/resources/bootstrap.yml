@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: securities-service
+  cloud.config.uri: http://localhost:8888
+  

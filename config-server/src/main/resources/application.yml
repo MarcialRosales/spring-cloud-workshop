@@ -10,5 +10,7 @@ spring:
         native:
           searchLocations: ../local-config-repo
         git:
-          uri: git@github.com:MarcialRosales/spring-cloud-workshop-config
+          uri: ssh://git@github.com/MarcialRosales/spring-cloud-workshop-config
+          clone-on-start: true
+          
           

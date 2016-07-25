@@ -60,5 +60,6 @@ Make sure that `spring.application.name` equals to `myapp`.
 
 ## 15:45 — 17:00 Configuration Management Lecture &amp; [Lab]
 
+<a href="docs/SpringCloudConfigSlides.pdf">Slides</a>
 
 ## 17:00 — 17:30 RabbitMQ Deployment and Best practices  &amp; [Q&A]

@@ -4,6 +4,8 @@
 
 ## 14:00 — 15:00 Service Registration and Discovery  [Lecture]
 
+<a href="docs/SpringCloudServiceDiscovery.pdf">Slides</a>
+
 ## 15:00 — 15:30 Zero-Downtime Deployments for Discoverable services   [Lab]
 
 We cannot register two PCF applications with the same `spring.application.name` against the same SCS `central-registry` service instance (but with different service's bindings or credentials) because according to SCS (1.1 and earlier) that is considered a security breached (i.e. another unexpected application is trying to register with the same name as another already registered application but using different credentials).

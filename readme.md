@@ -13,13 +13,13 @@ To go around this issue, we cannot bind PCF applications (blue and green) to the
 Instead, we need to ask the service instance -i.e. the `service-registry` from SCS- to provide us a credential and we create a `User Provided Service` with that credential. Once we have the `UPS` we can then bind that single `UPS` with our 2 applications, `green` and `blue`. That works because both instances, even though they are uniquely named in PCF they have the same `spring.application.name` used to register the app with Eureka and both apps are using the same credentials to talk to the `service-registry`, i.e. Eureka.
 
 ### Step by Step
-1. Create a service instance of the service registry (skip this process if you already have a service)
+1. Create a service instance of the service registry (skip this process if you already have a service instance)
    <br>`cf create-service p-service-registry standard central-registry`
 2. Create a service key and call it `service-registry`
   <br>`cf create-service-key central-registry service-registry`
 3. Read the actual key contained within the `service-registry` service key
   <br>`cf service-key central-registry service-registry`
-  It prints out something like this:
+  <br>It prints out something like this:
 
   ```
   Getting key service-registry for service instance central-registry as mrosales@pivotal.io...
@@ -32,7 +32,7 @@ Instead, we need to ask the service instance -i.e. the `service-registry` from S
 }
 ```
 4. Create a `User Provided Service` with the credentials above
-  <br>`cf cups service-registry -p '{"access_token_uri": "https://p-spring-cloud-services.uaa.run.haas-35.pez.pivotal.io/oauth/token","client_id": "p-service-registry-ce80e383-0691-4a0e-a48e-84df7035cb2e","client_secret": "WGE829u3U7qt","uri": "https://eureka-c890fdd0-18b5-4c5b-bc44-89ef2383dc08.cfapps.haas-35.pez.pivotal.io"}'``
+  <br>`cf cups service-registry -p '{"access_token_uri": "https://p-spring-cloud-services.uaa.run.haas-35.pez.pivotal.io/oauth/token","client_id": "p-service-registry-ce80e383-0691-4a0e-a48e-84df7035cb2e","client_secret": "WGE829u3U7qt","uri": "https://eureka-c890fdd0-18b5-4c5b-bc44-89ef2383dc08.cfapps.haas-35.pez.pivotal.io"}'`
 
 
 5. Push your blue app : `cf push -f manifest-blue.yml`

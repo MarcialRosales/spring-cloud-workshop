@@ -6,7 +6,7 @@
 
 ## 15:00 — 15:30 Zero-Downtime Deployments for Discoverable services   [Lab]
 
-We cannot register two PCF applications with the same `spring.application.name` with the same SCS `central-registry` service instance (but with different service's bindings or credentials) because according to SCS (1.1 and earlier) that is considered a security breached (i.e. another unexpected application is trying to register with the same name as another already registered application but using different credentials).
+We cannot register two PCF applications with the same `spring.application.name` against the same SCS `central-registry` service instance (but with different service's bindings or credentials) because according to SCS (1.1 and earlier) that is considered a security breached (i.e. another unexpected application is trying to register with the same name as another already registered application but using different credentials).
 
 To go around this issue, we cannot bind PCF applications (blue and green) to a service instance either thru `cf bind-service` neither via `services` section in the application's `manifest.yml` file because that will automatically create a new set of credentials for each application.
 

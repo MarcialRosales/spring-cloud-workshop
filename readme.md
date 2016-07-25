@@ -12,7 +12,7 @@ To go around this issue, we cannot bind PCF applications (blue and green) to the
 
 Instead, we need to ask the service instance -i.e. the `service-registry` from SCS- to provide us a credential and we create a `User Provided Service` with that credential. Once we have the `UPS` we can then bind that single `UPS` with our 2 applications, `green` and `blue`. That works because both instances, even though they are uniquely named in PCF they have the same `spring.application.name` used to register the app with Eureka and both apps are using the same credentials to talk to the `service-registry`, i.e. Eureka.
 
-Step by Step
+### Step by Step
 1. Create a service instance of the service registry (skip this process if you already have a service)
    <br>`cf create-service p-service-registry standard central-registry`
 2. Create a service key and call it `service-registry`

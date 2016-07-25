@@ -6,11 +6,11 @@
 
 ## 15:00 — 15:30 Zero-Downtime Deployments for Discoverable services   [Lab]
 
-We cannot bind two applications (i.e. with different names, say `spring.application.name: myapp-blue` and `spring.application.name: myapp-green`) with the same SCS `central-registry` service because according to SCS (1.1 and earlier) that is considered a security threat (i.e. another unexpected application is trying to register with the same name as another already registered application but using different credentials).
+We cannot register two PCF applications with the same `spring.application.name` with the same SCS `central-registry` service instance (but with different service's bindings or credentials) because according to SCS (1.1 and earlier) that is considered a security breached (i.e. another unexpected application is trying to register with the same name as another already registered application but using different credentials).
 
-To go around this issue, we cannot bind applications to service instances either thru `cf bind-service` neither via `services` section in the application's `manifest.yml` file because that will automatically create a new set of credentials for each application. If we have `blue` and `green` apps, that means both apps will have distinct credentials (i.e. OAuth credentials that allows an application to interact with an Eureka server provided by the SCS).
+To go around this issue, we cannot bind PCF applications (blue and green) to a service instance either thru `cf bind-service` neither via `services` section in the application's `manifest.yml` file because that will automatically create a new set of credentials for each application.
 
-Instead, we need to ask the service registry -from SCS- to provide us a credential and we create a `User Provided Service` with that credential and we can then bind that single `UPS` with our 2 applications, `green` and `blue`. That works because both instances, even though they are uniquely named in PCF they have the same `spring.application.name` used to register the app with Eureka.
+Instead, we need to ask the service instance -i.e. the `service-registry` from SCS- to provide us a credential and we create a `User Provided Service` with that credential. Once we have the `UPS` we can then bind that single `UPS` with our 2 applications, `green` and `blue`. That works because both instances, even though they are uniquely named in PCF they have the same `spring.application.name` used to register the app with Eureka and both apps are using the same credentials to talk to the `service-registry`, i.e. Eureka.
 
 Step by Step
 1. Create a service instance of the service registry (skip this process if you already have a service)

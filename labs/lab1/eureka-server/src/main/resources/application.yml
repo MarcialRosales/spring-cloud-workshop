@@ -1,7 +1,4 @@
-spring:
-  application:
-    name: eureka-server
-  cloud.config.uri: http://localhost:8888
+server.port: ${PORT:8761}
 
 # move this to central config
 eureka:

@@ -26,7 +26,22 @@ And the second part of the lab is to push our 2 applications to PCF and use PCF 
 
 ### Standalone Service Discovery
 
-1.
+Go to the folder, labs/lab1 in the cloned git repo.
+
+1. Run eureka-server (from STS boot dashboard or from command line)
+2. Go to the eureka-server url:
+`http://localhost:8761/`
+3. Run cf-demo-app
+4. Check that our application registered with Eureka via the Eureka Dashboard
+5. Check that our app works
+`curl localhost:8080/hello?name=Marcial`
+6. Run cf-demo-client
+7. Check that our application works, i.e. it automatically discover our demo app by its name and not by its url.
+`curl localhost:8081/hi?name=Bob`
+8. Check that our application can discover services using the `DiscoveryClient` api.
+curl localhost:8081/service-instances/demo | jq .
+
+We know our application works, we can push it to the cloud.
 
 ### Service Discovery in the Cloud
 

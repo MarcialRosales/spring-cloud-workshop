@@ -81,6 +81,8 @@ We know our application works, we can push it to the cloud.
 
 ### Service Discovery in the Cloud
 
+Note: Each attendee has its own account set up on this PCF foundation: https://apps.run-02.haas-40.pez.pivotal.io
+
 1. login
 `cf login -a https://api.run-02.haas-40.pez.pivotal.io --skip-ssl-validation`
 

@@ -1,0 +1,14 @@
+applications:
+- name: cf-demo-app-3
+  instances: 1
+  memory: 1024M
+  disk_quota: 1024M
+  host: cf-demo-app-3
+  domain: cfapps.haas-35.pez.pivotal.io
+  env:
+    CF_TARGET: https://api.run.haas-35.pez.pivotal.io
+    SPRING_PROFILES_ACTIVE: pcf
+    VERSION: 0.0.3
+  services:
+  - service-registry
+  stack: cflinuxfs2

@@ -2,9 +2,19 @@
 
 ## 13:00 — 14:00 Developing with Spring Cloud          [Lecture]
 
-## 14:00 — 15:00 Service Registration and Discovery  [Lecture]
+Introduction to Spring Cloud and why it exists
+
+## 14:00 — 15:00 Service Registration and Discovery    [Lecture]
 
 <a href="docs/SpringCloudServiceDiscovery.pdf">Slides</a>
+
+### Eureka and dependency on Jersey 1.19. Path to Jersey 2.0.
+
+- New Features on Jersey 2.0. Spring Web/REST vs Jersey 2.
+- WIP eureka2 project based on Jersey 2.0 (https://github.com/Netflix/eureka/tree/master/eureka-client-jersey2)
+- We still have to remove Ribbon transitive dependency on Jersey 1.19. It should be possible to remove it given that it has pluggable transport but it is a big job though.
+- If we really want to leverage Netflix's load balancing capabilities the preferred path would be to keep working with Jersey 1 until Netflix updates all its stack to Jersey 2.
+
 
 ## 15:00 — 15:30 Zero-Downtime Deployments for Discoverable services   [Lab]
 

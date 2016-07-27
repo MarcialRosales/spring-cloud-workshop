@@ -331,8 +331,81 @@ spring:
 - It automatically (no configuration required) proxies all your services registered with Eureka thru a single entry point.
 e.g. When the zuul proxy receives this request http://localhost:8082/demo/hello?name=Marcial it automatically forwards this request http://localhost:8080/hello?name=Marcial
 - We can configure zuul to only allow certain services regardless of the services registered in Eureka. This is done thru simple configuration.
-- We can however customize zuul. Zuul follows the idea of Servlet Filters. Every request is passed thru a number of filters and eventually the request is forwarded to destination or not. The filters allows us to intercept the requests at different stages: before the request is routed, after we receive a response from the destination service. There are special type of filters which we can use to override the routing logic.
+- However, we can customize zuul. Zuul follows the idea of Servlet Filters. Every request is passed thru a number of filters and eventually the request is forwarded to destination or not. The filters allows us to intercept the requests at different stages: before the request is routed, after we receive a response from the destination service. There are special type of filters which we can use to override the routing logic.
 
+To create a zuul server we simply create one like this:
+```
+@EnableZuulProxy
+@SpringBootApplication
+public class GatewayServiceApplication {
 
+	Map<String, Object> basicCache = new ConcurrentHashMap<>();
+
+	@Bean
+	public ZuulFilter histogramAccess(RouteLocator routeLocator, MetricRegistry metricRegistry) {
+		return new StatsCollector(routeLocator, metricRegistry);
+	}
+	public static void main(String[] args) {
+		SpringApplication.run(GatewayServiceApplication.class, args);
+	}
+}
+```
+We implement our own filter which keeps track of number of requests per service:
+```
+class StatsCollector extends ZuulFilter {
+
+	private static Logger log = LoggerFactory.getLogger(StatsCollector.class);
+	private MetricRegistry metrics;
+	private Map<String,String> serviceAliases = new HashMap<>();
+
+	public StatsCollector(RouteLocator routeLocator, MetricRegistry registry) {
+		super();
+		this.metrics = registry;
+		routeLocator.getRoutes().forEach(r -> {
+			String alias = aliasForService(r.getLocation());
+			serviceAliases.put(r.getLocation(), alias);
+			metrics.counter(alias);			
+		});
+	}
+	private String aliasForService(String name) {
+		return String.format("metrics.%s.requestCount", name);
+	}
+
+	@Override
+	public boolean shouldFilter() {
+		return true;
+	}
+
+	@Override
+	public int filterOrder() {
+		return 10;
+	}
+
+	@Override
+	public String filterType() {
+		return "pre";
+	}
+
+	@Override
+	public Object run() {
+		RequestContext ctx = RequestContext.getCurrentContext();
+
+		metrics.counter(serviceAliases.get((String)ctx.get("serviceId"))).inc();
+
+		return null;
+	}
+
+}
+```
+
+And we configure it so that all requests must be prefixed with `/api` and we want to disable every eureka service except one called `securities-service` and the url is not the standard one `/api/securities-service/` but `/api/securities`.
+```
+
+zuul:
+  prefix: /api
+  ignored-services: '*'
+  routes:
+    securities-service: /securities/**
+```    
 
 ## 17:00 — 17:30 RabbitMQ Deployment and Best practices  &amp; [Q&A]

@@ -18,6 +18,7 @@
 
 ### 17:00 — 17:15 Zuul                                  [Lecture / Lab]
 
+### 17:15 — 17:30 RabbitMQ Deployment and Best practices  &amp; [Q&A]
 
 - Introduction to Spring Cloud and why it exists
 - Spring Cloud OSS and Spring Cloud Services (PCF Tile)

@@ -325,6 +325,13 @@ spring:
           uri: file:../../{application}-repo
 ```          
 
+## Zuul server [Lecture]
+
+- @EnableZuulProxy
+- It automatically (no configuration required) proxies all your services registered with Eureka thru a single entry point.
+e.g. When the zuul proxy receives this request `http://localhost:8082/demo/hello?name=Marcial` it automatically forwards this request `http://localhost:8080/hello?name=Marcial`.
+- We can configure zuul to only allow certain services regardless of the services registered in Eureka.
+- 
 
 
 ## 17:00 — 17:30 RabbitMQ Deployment and Best practices  &amp; [Q&A]

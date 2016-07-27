@@ -1,11 +1,28 @@
 # AppDev workshop
 
-## 14:00 — 14:15 Developing with Spring Cloud          [Lecture]
+### 13:00 — 13:15 Developing with Spring Cloud          [Lecture]
+
+### 13:15 — 13:45 Service Registration and Discovery    [Lecture]
+
+### 13:45 - 14:15 Simple Discoverable applications      [Lab]
+
+### 14:15 - 15:15 Service Discovery in the Cloud        [Lab]
+
+### 15:15 - 15:45 Zero-Downtime Deployments for Discoverable services [Lab]
+
+### 15:45 - 16:00 Break
+
+### 16:00 - 16:30 Configuration Management              [Lecture]
+
+### 16:30 — 17:00 Configuration Management in the Cloud [Lab]
+
+### 17:00 — 17:15 Zuul                                  [Lecture / Lab]
+
 
 - Introduction to Spring Cloud and why it exists
 - Spring Cloud OSS and Spring Cloud Services (PCF Tile)
 
-## 14:15 — 14:45 Service Registration and Discovery    [Lecture]
+## Service Registration and Discovery    [Lecture]
 
 <a href="docs/SpringCloudServiceDiscovery.pdf">Slides</a>
 
@@ -15,7 +32,7 @@
 NOTE: To enable direct registration, you must configure the PCF environment to allow traffic across containers or cells. In PCF 1.6, visit the Pivotal Cloud Foundry® Operations Manager®, click the Pivotal Elastic Runtime tile, and in the Security Config tab, ensure that the “Enable cross-container traffic” option is enabled.
 ```
 
-## 14:45 - 15:15 Simple Discoverable applications [Lab]
+##  Service Registration and Discovery    [Lab]
 
 ```
 cf-demo-client ----{ http://demo/hi?name=Bob }--> cf-demo-app
@@ -100,8 +117,7 @@ We know our application works, we can push it to the cloud.
 - If we really want to leverage Netflix's load balancing capabilities the preferred path would be to keep working with Jersey 1 until Netflix updates all its stack to Jersey 2.
 
 
-
-## 15:00 — 15:30 Zero-Downtime Deployments for Discoverable services   [Lab]
+## Zero-Downtime Deployments for Discoverable services   [Lab]
 
 We cannot register two PCF applications with the same `spring.application.name` against the same SCS `central-registry` service instance (but with different service's bindings or credentials) because according to SCS (1.1 and earlier) that is considered a security breached (i.e. another unexpected application is trying to register with the same name as another already registered application but using different credentials).
 

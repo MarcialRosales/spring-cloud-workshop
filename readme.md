@@ -20,6 +20,10 @@
 
 ### 17:15 — 17:30 RabbitMQ Deployment and Best practices  &amp; [Q&A]
 
+<p>
+<p>
+## Developing with Spring Cloud
+
 - Introduction to Spring Cloud and why it exists
 - Spring Cloud OSS and Spring Cloud Services (PCF Tile)
 

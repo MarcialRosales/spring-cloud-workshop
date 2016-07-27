@@ -1,6 +1,6 @@
 # AppDev workshop
 
-### 13:00 — 13:15 Developing with Spring Cloud          [Lecture]
+- 13:00 — 13:15 Developing with Spring Cloud          [Lecture]
 
 ### 13:15 — 13:45 Service Registration and Discovery    [Lecture]
 

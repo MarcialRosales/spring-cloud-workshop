@@ -4,15 +4,15 @@
 
 - 13:15 — 13:45 Service Registration and Discovery    [Lecture]
 
-- 13:45 - 14:15 Simple Discoverable applications      [Lab]
+- 13:45 — 14:15 Simple Discoverable applications      [Lab]
 
-- 14:15 - 15:15 Service Discovery in the Cloud        [Lab]
+- 14:15 — 15:15 Service Discovery in the Cloud        [Lab]
 
-- 15:15 - 15:45 Zero-Downtime Deployments for Discoverable services [Lab]
+- 15:15 — 15:45 Zero-Downtime Deployments for Discoverable services [Lab]
 
-- 15:45 - 16:00 Break
+- 15:45 — 16:00 Break
 
-- 16:00 - 16:30 Configuration Management              [Lecture]
+- 16:00 — 16:30 Configuration Management              [Lecture]
 
 - 16:30 — 17:00 Configuration Management in the Cloud [Lab]
 
@@ -354,7 +354,7 @@ e.g. When the zuul proxy receives this request http://localhost:8082/demo/hello?
 - We can configure zuul to only allow certain services regardless of the services registered in Eureka. This is done thru simple configuration.
 - However, we can customize zuul. Zuul follows the idea of Servlet Filters. Every request is passed thru a number of filters and eventually the request is forwarded to destination or not. The filters allows us to intercept the requests at different stages: before the request is routed, after we receive a response from the destination service. There are special type of filters which we can use to override the routing logic.
 
-To create a zuul server we simply create one like this: (source code available under labs\lab3)
+To create a zuul server we simply create one like this: (source code available under `labs\lab3`)
 ```
 @EnableZuulProxy
 @SpringBootApplication

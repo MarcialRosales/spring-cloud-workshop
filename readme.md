@@ -354,7 +354,7 @@ e.g. When the zuul proxy receives this request http://localhost:8082/demo/hello?
 - We can configure zuul to only allow certain services regardless of the services registered in Eureka. This is done thru simple configuration.
 - However, we can customize zuul. Zuul follows the idea of Servlet Filters. Every request is passed thru a number of filters and eventually the request is forwarded to destination or not. The filters allows us to intercept the requests at different stages: before the request is routed, after we receive a response from the destination service. There are special type of filters which we can use to override the routing logic.
 
-To create a zuul server we simply create one like this:
+To create a zuul server we simply create one like this: (source code available under labs\lab3)
 ```
 @EnableZuulProxy
 @SpringBootApplication

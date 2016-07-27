@@ -1,0 +1,20 @@
+server.port: 8081
+
+spring:
+  application:
+    name: demo-client
+    
+security:
+  basic:
+    enabled: false # The Spring Cloud Services Starter depends on spring security and automatically enables basic auth
+
+endpoints:
+  sensitive: false
+  shutdown.enabled: true
+
+eureka:
+  client:
+    eureka-service-url-poll-interval-seconds: 10 # the doc says by default it is 0 but in PCF it is not, it is around 60 second or so
+    log-delta-diff: true
+    register-with-eureka: false # this is the public facing app. no one else will look it up.   
+    

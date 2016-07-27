@@ -160,8 +160,168 @@ applications:
 Make sure that `spring.application.name` equals to `myapp`.
 
 
-## 15:45 — 17:00 Configuration Management Lecture &amp; [Lab]
+## 15:45 — 17:00 Configuration Management [Lecture]
 
 <a href="docs/SpringCloudConfigSlides.pdf">Slides</a>
+
+
+
+### Additional comments
+- We can store our credentials encrypted in the repo and Spring Config Server will decrypt them before delivering them to the client.
+- Spring Config Service (PCF Tile) does not support server-side decryption. Instead, we have to configure our client to do it. For that we need to make sure that the java buildpack is configured with `Java Cryptography Extension (JCE) Unlimited Strength policy files`. For further details check out the <a href="http://docs.pivotal.io/spring-cloud-services/config-server/writing-client-applications.html#use-client-side-decryption">docs</a>.
+
+
+## 15:45 — 17:00 Configuration Management  [Lab]
+Go to the folder, labs/lab2 in the cloned git repo.
+
+1. Check the config server in the market place
+`cf marketplace -s p-config-server`
+2. Create a service instance
+`cf create-service -c '{"git": { "uri": "https://github.com/MarcialRosales/spring-cloud-workshop-config" }, "count": 1 }' p-config-server standard config-server`
+
+3. Modify our application so that it has a `bootstrap.yml` rather than `application.yml`. We don't really need an `application.yml`. If we have one, Spring Config client will take that as the default properties of the application.
+
+4. Our repo already has our `demo.yml`. If we did not have our `spring.application.name`, the `spring-auto-configuration` jar injected by the java buildpack will automatically create a `spring.application.name` environment variable based on the env variable `VCAP_APPLICATION { ... "application_name": "cf-demo-app" ... }`.
+
+5. Push our `cf-demo-app`.
+
+6. Check that our application is now bound to the config server
+`cf env cf-demo-app`
+
+7. Check that it loaded the application's configuration from the config server.
+`curl cf-demo-app.cfapps-02.haas-40.pez.pivotal.io/env | jq .`
+
+We should have these configuration at the top :
+```
+"configService:https://github.com/MarcialRosales/spring-cloud-workshop-config/demo.yml": {
+    "mymessage": "Good afternoon"
+  },
+  "configService:https://github.com/MarcialRosales/spring-cloud-workshop-config/application.yml": {
+    "info.id": "${spring.application.name}"
+  },
+```  
+
+8. Check that our application is actually loading the message from the central config and not the default message `Hello`.
+`curl cf-demo-app.cfapps-02.haas-40.pez.pivotal.io/hello?name=Marcial`
+
+9. We can modify the demo.yml in github, and ask our application to reload the settings.
+`curl -X POST cf-demo-app.cfapps-02.haas-40.pez.pivotal.io/refresh`
+
+Check the message again.
+`curl cf-demo-app.cfapps-02.haas-40.pez.pivotal.io/hello?name=Marcial`
+
+
+10. Add a new configuration for production : `demo-production.yml` to the repo.
+
+11. Configure our application to use production profile by manually setting an environment variable in CF:
+`cf set-env cf-demo-app SPRING_PROFILES_ACTIVE production`
+
+we have to restage our application because we have modified the environment.
+
+12. Check our application returns us a different value this type
+`curl cf-demo-app.cfapps-02.haas-40.pez.pivotal.io/env | jq .`
+
+We should have these configuration at the top :
+
+
+Note about Reloading configuration: This works provided you only have one instance. Ideally, we want to configure our config server to receive a callback from Github (webhooks onto the actuator endpoint `/monitor`) when a change occurs. The config server (if bundled with the jar `spring-cloud-config-monitor`).
+
+One configuration most people want to dynamically change is the logging level. Exercise is to modify the code to add a logger and add the logging level the demo.yml or demo-production.yml :
+```
+logging:
+  level:
+    io.pivotal.demo.CfDemoAppApplication: debug    
+
+```
+
+### Get started very quickly with spring config server : local file system (no git repo required)
+```
+---
+spring.profiles: native
+spring:
+  cloud:
+    config:
+      server:
+        native:
+          searchLocations: ../../spring-cloud-workshop-config      
+```
+
+### Use local git repo (all files must be committed!). One repo for all our applications and each application and profile has its own folder.
+```
+---
+spring.profiles: git-local-common-repo
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          uri: file:../../spring-cloud-workshop-config
+          searchPaths: groupA-{application}-{profile}
+```
+
+### Use local git repo. But different repos for different profiles
+Spring Config server will try to resolve a pattern against ${application}/{profile}
+
+```
+---
+spring.profiles: git-local-multi-repos-per-profile
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          uri: file:../../emptyRepo
+          repos:
+            dev-repos:
+              pattern: "*/dev"
+              uri: file:../../dev-repo
+            prod-repos:
+              pattern: "*/prod"
+              uri: file:../../prod-repo
+```
+ In this case, we have decided to have one repo specific for dev profile and another for prod profile              
+ `curl localhost:8888/quote-service2/dev | jq .`
+
+### Use local git repo. Multiple repos per teams.
+
+```
+ ---
+ spring.profiles: git-local-multi-repos-per-teams
+ spring:
+   cloud:
+     config:
+       server:
+         git:
+           uri: file:../../emptyRepo
+           repos:
+             trading:
+               pattern: trading-*
+               uri: file:../../trading
+             pricing:
+               pattern: pricing-*
+               uri: file:../../pricing
+             orders:
+               pattern: orders-*
+               uri: file:../../orders
+
+```
+
+We have 3 teams, trading, pricing, and orders. One repo per team responsible of a business capability.               
+`curl localhost:8888/trading-execution-service/default | jq .`
+`curl localhost:8888/pricing-quote-service/default | jq .`
+
+### Use lcoal git repo. One repo per application.
+```
+---
+spring.profiles: git-local-one-repo-per-app
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          uri: file:../../{application}-repo
+```          
+
+
 
 ## 17:00 — 17:30 RabbitMQ Deployment and Best practices  &amp; [Q&A]

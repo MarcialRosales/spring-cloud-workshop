@@ -1,0 +1,9 @@
+server.port: ${PORT:8761}
+
+# move this to central config
+eureka:
+  client: #  switch off the client side behaviour, so it doesn’t keep trying and failing to reach its peers
+    registerWithEureka: false 
+    fetchRegistry: false 
+
+  

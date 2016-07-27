@@ -1,6 +1,11 @@
 spring:
   application:
     name: demo
+ 
+endpoints:
+  sensitive: false
+  shutdown.enabled: true
+ 
     
 security:
   basic:

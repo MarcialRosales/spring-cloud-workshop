@@ -9,6 +9,12 @@
 
 <a href="docs/SpringCloudServiceDiscovery.pdf">Slides</a>
 
+- SCS gives the ability to have our applications talk each directly  without going thru the router. To do that we need have an application setting called  `spring.cloud.services.registrationMethod`. The values for this setting are : `route` and `direct`. If we use `route` (the default value), our applications register using their PCF route else if they register using their IP address.
+
+```
+NOTE: To enable direct registration, you must configure the PCF environment to allow traffic across containers or cells. In PCF 1.6, visit the Pivotal Cloud Foundry® Operations Manager®, click the Pivotal Elastic Runtime tile, and in the Security Config tab, ensure that the “Enable cross-container traffic” option is enabled.
+```
+
 ## 14:45 - 15:15 Simple Discoverable applications [Lab]
 
 ```
@@ -39,7 +45,15 @@ Go to the folder, labs/lab1 in the cloned git repo.
 7. Check that our application works, i.e. it automatically discover our demo app by its name and not by its url.
 `curl localhost:8081/hi?name=Bob`
 8. Check that our application can discover services using the `DiscoveryClient` api.
-curl localhost:8081/service-instances/demo | jq .
+`curl localhost:8081/service-instances/demo | jq .``
+
+9. stop the cf-demo-app
+10. Check that it disappears from eureka but it is still visible to the client app.
+`curl localhost:8081/service-instances/demo | jq .`
+After 30 seconds it will disappear. This is because the client queries eureka every 30 seconds for a delta on what has happened since the last query.
+
+11. stop eureka server, check in the logs of the demo app exceptions. Start the eureka server, and see that the service is restored, run to check it out:
+`curl localhost:8081/service-instances/demo | jq .`
 
 We know our application works, we can push it to the cloud.
 
@@ -95,7 +109,12 @@ To go around this issue, we cannot bind PCF applications (blue and green) to the
 
 Instead, we need to ask the service instance -i.e. the `service-registry` from SCS- to provide us a credential and we create a `User Provided Service` with that credential. Once we have the `UPS` we can then bind that single `UPS` with our 2 applications, `green` and `blue`. That works because both instances, even though they are uniquely named in PCF they have the same `spring.application.name` used to register the app with Eureka and both apps are using the same credentials to talk to the `service-registry`, i.e. Eureka.
 
-### Step by Step
+### Step by Step 1)
+1. Create a new manifest and modify the attribute 'name' and change it to `cf-demo-app-green` and push the app.
+2. It will fail because Eureka does not allow two PCF apps to register with Eureka using the same  `spring.application.name`.
+
+
+### Step by Step 2)
 1. Create a service instance of the service registry (skip this process if you already have a service instance)
    <br>`cf create-service p-service-registry standard central-registry`
 2. Create a service key and call it `service-registry`

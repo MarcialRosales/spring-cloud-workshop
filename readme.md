@@ -1,12 +1,67 @@
 # AppDev workshop
 
-## 13:00 — 14:00 Developing with Spring Cloud          [Lecture]
+## 14:00 — 14:15 Developing with Spring Cloud          [Lecture]
 
-Introduction to Spring Cloud and why it exists
+- Introduction to Spring Cloud and why it exists
+- Spring Cloud OSS and Spring Cloud Services (PCF Tile)
 
-## 14:00 — 15:00 Service Registration and Discovery    [Lecture]
+## 14:15 — 14:45 Service Registration and Discovery    [Lecture]
 
 <a href="docs/SpringCloudServiceDiscovery.pdf">Slides</a>
+
+## 14:45 - 15:15 Simple Discoverable applications [Lab]
+
+```
+cf-demo-client ----{ http://demo/hi?name=Bob }--> cf-demo-app
+                <----{ `hello Bob` }-------------
+```
+
+First we are going to get our 2 applications running locally. With our local Eureka server.
+And the second part of the lab is to push our 2 applications to PCF and use PCF Service Registry to register our applications rather than our standalone Eureka server.
+
+### Set up
+
+1. You will need JDK 8, Maven and STS. If you don't use STS, you need to go to <a href="http://start.spring.io/">Spring Initilizr</a> to create your projects.
+2. git clone https://github.com/MarcialRosales/spring-cloud-workshop
+
+### Standalone Service Discovery
+
+1.
+
+### Service Discovery in the Cloud
+
+1. login
+`cf login -a https://api.run-02.haas-40.pez.pivotal.io --skip-ssl-validation`
+
+2. create service (http://docs.pivotal.io/spring-cloud-services/service-registry/creating-an-instance.html)
+
+`cf marketplace -s p-service-registry`
+`cf create-service p-service-registry standard registry-service`
+
+3. update manifest.yml (host, and CF_TARGET)
+4. push the application
+`cf push`
+
+5. Check the app is working
+`curl cf-demo-app.cfapps-02.haas-40.pez.pivotal.io/hello?name=Marcial`
+
+6. Go to the Admin page of the registry-service and check that our service is there
+
+7. Now we install our client application
+8. update manifest.yml (host, and CF_TARGET)
+9. push the application
+
+10. Check the app is working
+`cf-demo-client.cfapps-02.haas-40.pez.pivotal.io/hi?name=Marcial`
+
+11. Check that our app is not actually registered with Eureka however it has discovered our `demo` app.
+
+12. We can rely on RestTemplate to automatically resolve a service-name to a url. But we can also use the Discovery API to get their urls.
+`curl cf-demo-client.cfapps-02.haas-40.pez.pivotal.io/service-instances/demo | jq .`
+
+13. Comment out the annotation @LoadBalanced which decorates a RestTemplate with Ribbon capabilities so that we can use a service-name instead of a URL and push the app. you will see that the first request below but not the second one.
+`cf-demo-client.cfapps-02.haas-40.pez.pivotal.io/hi?name=Marcial`
+`curl cf-demo-client.cfapps-02.haas-40.pez.pivotal.io/service-instances/demo | jq .`
 
 ### Eureka and dependency on Jersey 1.19. Path to Jersey 2.0.
 
@@ -14,6 +69,7 @@ Introduction to Spring Cloud and why it exists
 - WIP eureka2 project based on Jersey 2.0 (https://github.com/Netflix/eureka/tree/master/eureka-client-jersey2)
 - We still have to remove Ribbon transitive dependency on Jersey 1.19. It should be possible to remove it given that it has pluggable transport but it is a big job though.
 - If we really want to leverage Netflix's load balancing capabilities the preferred path would be to keep working with Jersey 1 until Netflix updates all its stack to Jersey 2.
+
 
 
 ## 15:00 — 15:30 Zero-Downtime Deployments for Discoverable services   [Lab]

@@ -1,0 +1,18 @@
+---
+applications:
+- name: cf-demo-client
+  memory: 1G
+  instances: 1
+  host: cf-demo-client
+  domain: cfapps-02.haas-40.pez.pivotal.io
+  path: target/cf-demo-client-0.0.1-SNAPSHOT.jar
+  services:
+  - registry-service
+#    env:
+#    CF_DEMO_CLIENT_URL: http://cf-demo-app-4.cfapps.haas-35.pez.pivotal.io
+  
+env:
+  SPRING_PROFILES_ACTIVE: pcf
+  CF_TARGET: https://api.run-02.haas-40.pez.pivotal.io
+  VERSION: 0.0.1
+    

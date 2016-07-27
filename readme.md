@@ -225,6 +225,7 @@ We should have these configuration at the top :
 
 
 Note about Reloading configuration: This works provided you only have one instance. Ideally, we want to configure our config server to receive a callback from Github (webhooks onto the actuator endpoint `/monitor`) when a change occurs. The config server (if bundled with the jar `spring-cloud-config-monitor`).
+If we have more than one application instances you can still reload the configuration on all instances if you add the dependency `spring-cloud-starter-bus-amqp` to all the applications. It exposes a new endpoint called `/bus/refresh` . We would only need to go to reach one of the application instances and that instance will propagate the refresh request to all the other instances.
 
 One configuration most people want to dynamically change is the logging level. Exercise is to modify the code to add a logger and add the logging level the demo.yml or demo-production.yml :
 ```

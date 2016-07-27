@@ -234,7 +234,9 @@ logging:
 
 ```
 
-### Get started very quickly with spring config server : local file system (no git repo required)
+### How to organize my application's configuration around the concept of a central repository
+
+#### Get started very quickly with spring config server : local file system (no git repo required)
 ```
 ---
 spring.profiles: native
@@ -246,7 +248,7 @@ spring:
           searchLocations: ../../spring-cloud-workshop-config      
 ```
 
-### Use local git repo (all files must be committed!). One repo for all our applications and each application and profile has its own folder.
+#### Use local git repo (all files must be committed!). One repo for all our applications and each application and profile has its own folder.
 ```
 ---
 spring.profiles: git-local-common-repo
@@ -259,7 +261,7 @@ spring:
           searchPaths: groupA-{application}-{profile}
 ```
 
-### Use local git repo. But different repos for different profiles
+#### Use local git repo. But different repos for different profiles
 Spring Config server will try to resolve a pattern against ${application}/{profile}
 
 ```
@@ -282,7 +284,7 @@ spring:
  In this case, we have decided to have one repo specific for dev profile and another for prod profile              
  `curl localhost:8888/quote-service2/dev | jq .`
 
-### Use local git repo. Multiple repos per teams.
+#### Use local git repo. Multiple repos per teams.
 
 ```
  ---
@@ -310,7 +312,7 @@ We have 3 teams, trading, pricing, and orders. One repo per team responsible of 
 `curl localhost:8888/trading-execution-service/default | jq .`
 `curl localhost:8888/pricing-quote-service/default | jq .`
 
-### Use lcoal git repo. One repo per application.
+#### Use lcoal git repo. One repo per application.
 ```
 ---
 spring.profiles: git-local-one-repo-per-app

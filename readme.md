@@ -2,23 +2,23 @@
 
 - 13:00 — 13:15 Developing with Spring Cloud          [Lecture]
 
-### 13:15 — 13:45 Service Registration and Discovery    [Lecture]
+- 13:15 — 13:45 Service Registration and Discovery    [Lecture]
 
-### 13:45 - 14:15 Simple Discoverable applications      [Lab]
+- 13:45 - 14:15 Simple Discoverable applications      [Lab]
 
-### 14:15 - 15:15 Service Discovery in the Cloud        [Lab]
+- 14:15 - 15:15 Service Discovery in the Cloud        [Lab]
 
-### 15:15 - 15:45 Zero-Downtime Deployments for Discoverable services [Lab]
+- 15:15 - 15:45 Zero-Downtime Deployments for Discoverable services [Lab]
 
-### 15:45 - 16:00 Break
+- 15:45 - 16:00 Break
 
-### 16:00 - 16:30 Configuration Management              [Lecture]
+- 16:00 - 16:30 Configuration Management              [Lecture]
 
-### 16:30 — 17:00 Configuration Management in the Cloud [Lab]
+- 16:30 — 17:00 Configuration Management in the Cloud [Lab]
 
-### 17:00 — 17:15 Zuul                                  [Lecture / Lab]
+- 17:00 — 17:15 Zuul                                  [Lecture / Lab]
 
-### 17:15 — 17:30 RabbitMQ Deployment and Best practices  &amp; [Q&A]
+- 17:15 — 17:30 RabbitMQ Deployment and Best practices  &amp; [Q&A]
 
 <p>
 <p>

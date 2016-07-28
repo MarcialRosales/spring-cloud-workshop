@@ -1,0 +1,8 @@
+endpoints:
+  sensitive: false
+  shutdown.enabled: true
+ 
+    
+security:
+  basic:
+    enabled: false # The Spring Cloud Services Starter depends on spring security and automatically enables basic auth

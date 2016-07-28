@@ -1,0 +1,131 @@
+server:
+  port: 8888
+
+spring.profiles.active: native
+
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          clone-on-start: false
+
+security:
+  basic:
+    enabled: false 
+
+
+---
+spring.profiles: secured
+security:
+  basic:
+    enabled: true 
+  user:
+    password: pwd              
+
+---
+spring.profiles: native
+spring:
+  cloud:
+    config:
+      server:
+        native:
+          searchLocations: ../../spring-cloud-workshop-config      
+
+---
+spring.profiles: git-local-common-repo
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          uri: file:../../spring-cloud-workshop-config
+          searchPaths: groupA-{application}-{profile}
+
+---
+spring.profiles: git-local-multi-repos-per-profile
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          uri: file:../../emptyRepo
+          repos:
+            dev-repos: 
+              pattern: "*/dev"
+              uri: file:../../dev-repo
+            prod-repos: 
+              pattern: "*/prod"
+              uri: file:../../prod-repo
+               
+                    
+# Several repos. In this case, we have decided to have one repo specific for dev profile and another for prod profile              
+# curl localhost:8888/quote-service2/dev | jq .
+
+---
+spring.profiles: git-local-multi-repos-per-teams
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          uri: file:../../emptyRepo
+          repos:
+            trading: 
+              pattern: trading-*
+              uri: file:../../trading
+            pricing: 
+              pattern: pricing-*
+              uri: file:../../pricing
+            orders: 
+              pattern: orders-*
+              uri: file:../../orders
+              
+               
+                    
+# One repo per team responsibble of a business capability.               
+# curl localhost:8888/trading-execution-service/default | jq .
+# curl localhost:8888/pricing-quote-service/default | jq .
+
+---
+spring.profiles: git-local-one-repo-per-app
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          uri: file:../../{application}-repo
+          
+          
+# One git repo dedicated to each application. 
+              
+---
+spring.profiles: git-local-dedicated-repo
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          uri: file:../../spring-cloud-workshop-config
+          repos:
+            teamA:
+              uri: file:../../spring-cloud-workshop-config/teamA
+            teamB:
+              uri: file:../../spring-cloud-workshop-config/teamB
+          
+# Repo per team responsible of a set of applications and each profile has its own folder. Here only three profiles are recognized
+# quoteSErvice is under teamA
+# securitiesService is under teamB
+              
+---
+spring.profiles: git-remote
+
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          #uri: ssh://git@github.com/MarcialRosales/spring-cloud-workshop-config
+          uri: ssh://github.com/spring-cloud-samples
+        
+          

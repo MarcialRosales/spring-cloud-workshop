@@ -132,6 +132,8 @@ To go around this issue, we cannot bind PCF applications (blue and green) to the
 
 Instead, we need to ask the service instance -i.e. the `service-registry` from SCS- to provide us a credential and we create a `User Provided Service` with that credential. Once we have the `UPS` we can then bind that single `UPS` with our 2 applications, `green` and `blue`. That works because both instances, even though they are uniquely named in PCF they have the same `spring.application.name` used to register the app with Eureka and both apps are using the same credentials to talk to the `service-registry`, i.e. Eureka.
 
+Go to the folder, labs/lab3 in the cloned git repo.
+
 ### Step by Step 1)
 1. Create a new manifest and modify the attribute 'name' and change it to `cf-demo-app-green` and push the app.
 2. It will fail because Eureka does not allow two PCF apps to register with Eureka using the same  `spring.application.name`.
@@ -156,37 +158,47 @@ Instead, we need to ask the service instance -i.e. the `service-registry` from S
  "uri": "https://eureka-c890fdd0-18b5-4c5b-bc44-89ef2383dc08.cfapps.haas-35.pez.pivotal.io"
 }
 ```
-4. Create a `User Provided Service` with the credentials above
-  <br>`cf cups service-registry -p '{"access_token_uri": "https://p-spring-cloud-services.uaa.run.haas-35.pez.pivotal.io/oauth/token","client_id": "p-service-registry-ce80e383-0691-4a0e-a48e-84df7035cb2e","client_secret": "WGE829u3U7qt","uri": "https://eureka-c890fdd0-18b5-4c5b-bc44-89ef2383dc08.cfapps.haas-35.pez.pivotal.io"}'`
+
+4. We have to create a `User Provided Service` with the credentials above. We will do that briefly.
+
+5. We need to create a custom `EurekaServiceInfoCreator` class that is able to recognize our new `User Provided Service` as an Eureka Service. For reference, a `ServiceInfoCreator` is a Java class of the `spring cloud service connectors` library which is able to create a `ServiceInfo` from a `VCAP_SERVICES` variable. There are many types of services, for instances, databases, messaging middleware, you name it. For each type of service, there is a `ServiceInfoCreator` class. The `connectors` library has a list of those `ServiceInfoCreator` classes. During the bootstrap process, the `connectors` library iterates over the list of services declared in the `VCAP_SERVICES` variable. For each service, the `connectors` library asks each `ServiceInfoCreator` if they recognize that service as of its type. For instance, the  `EurekaServiceInfoCreator` will look up the value `eureka` in the `tags` attribute of the service. If there is a match, the `connectors` library asks the `EurekaServiceInfoCreator` to create an `EurekaServiceInfo` instance which later on it is used to configure the `Eureka client`.
 
 
-5. Push your blue app : `cf push -f manifest-blue.yml`
+6. We need to create a new (text) file that the `connectors` library use to identify `ServiceInfoCreator` classes in the class-path. This file must be located under `src/main/resources/META-INF/services/org.springframework.cloud.cloudfoundry.CloudFoundryServiceInfoCreator`. We add the following line to the file: `io.pivotal.demo.EurekaServiceInfoCreator`.
+
+
+7. Now we create a `User Provided Service` with the credentials above (Remember that we need to add our `label` attribute)
+  <br>`cf cups service-registry -p '{"access_token_uri": "https://p-spring-cloud-services.uaa.run.haas-35.pez.pivotal.io/oauth/token","client_id": "p-service-registry-ce80e383-0691-4a0e-a48e-84df7035cb2e","client_secret": "WGE829u3U7qt","uri": "https://eureka-c890fdd0-18b5-4c5b-bc44-89ef2383dc08.cfapps.haas-35.pez.pivotal.io", "label": "eureka"}'`
+
+
+8. Push your blue app : `cf push -f manifest.yml`
 ```
 ...
 applications:
-- name: myappp-blue
+- name: cf-demo-app
   services:
   - service-registry
 ...
 ```
-Make sure that `spring.application.name` equals to `myapp`.
 
-6. Repeat the process with green app: `cf push -f manifest-green.yml`
+9. Repeat the process with green app: `cf push -f manifest-green.yml`
 ```
 ...
 applications:
-- name: myappp-green
+- name: cf-demo-app-green
   services:
   - service-registry
 ...
 ```
-Make sure that `spring.application.name` equals to `myapp`.
+
+Both apps have `spring.application.name` equals to `demo`.
+
+10. Check Eureka dashboard has one entry for our `demo` service with 2 urls, one for blue and another for green.
 
 
 ## 15:45 — 17:00 Configuration Management [Lecture]
 
 <a href="docs/SpringCloudConfigSlides.pdf">Slides</a>
-
 
 
 ### Additional comments
@@ -336,7 +348,7 @@ We have 3 teams, trading, pricing, and orders. One repo per team responsible of 
 `curl localhost:8888/trading-execution-service/default | jq .`
 `curl localhost:8888/pricing-quote-service/default | jq .`
 
-#### Use lcoal git repo. One repo per application.
+#### Use local git repo. One repo per application.
 ```
 ---
 spring.profiles: git-local-one-repo-per-app
@@ -356,7 +368,7 @@ e.g. When the zuul proxy receives this request http://localhost:8082/demo/hello?
 - We can configure zuul to only allow certain services regardless of the services registered in Eureka. This is done thru simple configuration.
 - However, we can customize zuul. Zuul follows the idea of Servlet Filters. Every request is passed thru a number of filters and eventually the request is forwarded to destination or not. The filters allows us to intercept the requests at different stages: before the request is routed, after we receive a response from the destination service. There are special type of filters which we can use to override the routing logic.
 
-To create a zuul server we simply create one like this: (source code available under `labs\lab3`)
+To create a zuul server we simply create one like this: (source code available under `labs\lab4`)
 ```
 @EnableZuulProxy
 @SpringBootApplication

@@ -1,6 +1,6 @@
 spring:
   application:
-    name: gateway-service
+    name: gateway
   cloud.config.uri: http://localhost:8888
 
 

@@ -36,7 +36,7 @@ public class GatewayServiceApplication {
 	}
 }
 
-// curl localhost:8082/metrics | jq '.["metrics.securities-service.requestCount"]'
+// curl localhost:8082/metrics | jq '.["metrics.demo.requestCount"]'
 class StatsCollector extends ZuulFilter {
 
 	private static Logger log = LoggerFactory.getLogger(StatsCollector.class);

@@ -8,7 +8,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>cf-demo-gatewaye</name>
+	<name>cf-demo-gateway</name>
 	<description>Demo project for Spring Boot</description>
 
 	<parent>
@@ -25,6 +25,11 @@
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>io.pivotal.demo</groupId>
+			<artifactId>cf-demo-connectors</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-eureka</artifactId>

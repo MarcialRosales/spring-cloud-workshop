@@ -1,7 +1,0 @@
-spring:
-  application:
-    name: quote-service
-  cloud.config.uri: http://localhost:8888
-  profiles:
-    active: messaging,development
-

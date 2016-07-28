@@ -18,7 +18,6 @@
 
 - 17:00 — 17:15 Zuul                                  [Lecture / Lab]
 
-- 17:15 — 17:30 RabbitMQ Deployment and Best practices  &amp; [Q&A]
 
 <p>
 <p>
@@ -163,7 +162,7 @@ Go to the folder, labs/lab3 in the cloned git repo.
 
 5. We need to create a custom `EurekaServiceInfoCreator` class that is able to recognize our new `User Provided Service` as an Eureka Service. For reference, a `ServiceInfoCreator` is a Java class of the `spring cloud service connectors` library which is able to create a `ServiceInfo` from a `VCAP_SERVICES` variable. There are many types of services, for instances, databases, messaging middleware, you name it. For each type of service, there is a `ServiceInfoCreator` class. The `connectors` library has a list of those `ServiceInfoCreator` classes. During the bootstrap process, the `connectors` library iterates over the list of services declared in the `VCAP_SERVICES` variable. For each service, the `connectors` library asks each `ServiceInfoCreator` if they recognize that service as of its type. For instance, the  `EurekaServiceInfoCreator` will look up the value `eureka` in the `tags` attribute of the service. If there is a match, the `connectors` library asks the `EurekaServiceInfoCreator` to create an `EurekaServiceInfo` instance which later on it is used to configure the `Eureka client`.
 
-We create a separate java project (`cf-demo-connectors`) for our custom `EurekaServiceInfoCreator` class so that we can bundle it with the `cf-demo-app` and `cf-demo-client` projects. Both applications will need to bind to the Eureka service therefore they need to find the eureka service in the `VCAP_SERVICES`. 
+We create a separate java project (`cf-demo-connectors`) for our custom `EurekaServiceInfoCreator` class so that we can bundle it with the `cf-demo-app` and `cf-demo-client` projects. Both applications will need to bind to the Eureka service therefore they need to find the eureka service in the `VCAP_SERVICES`.
 
 6. We need to create a new (text) file that the `connectors` library use to identify `ServiceInfoCreator` classes in the class-path. This file must be located under `src/main/resources/META-INF/services/org.springframework.cloud.cloudfoundry.CloudFoundryServiceInfoCreator`. We add the following line to the file: `io.pivotal.demo.EurekaServiceInfoCreator`. We put this file in the project we created for the `EurekaServiceInfoCreator`.
 
@@ -365,11 +364,15 @@ spring:
 
 - @EnableZuulProxy
 - It automatically (no configuration required) proxies all your services registered with Eureka thru a single entry point.
-e.g. When the zuul proxy receives this request http://localhost:8082/demo/hello?name=Marcial it automatically forwards this request http://localhost:8080/hello?name=Marcial
-- We can configure zuul to only allow certain services regardless of the services registered in Eureka. This is done thru simple configuration.
-- However, we can customize zuul. Zuul follows the idea of Servlet Filters. Every request is passed thru a number of filters and eventually the request is forwarded to destination or not. The filters allows us to intercept the requests at different stages: before the request is routed, after we receive a response from the destination service. There are special type of filters which we can use to override the routing logic.
+e.g. When the zuul proxy receives this request http://localhost:8082/demo/hello?name=Marcial it automatically forwards this request to http://localhost:8080/hello?name=Marcial
+- We can configure Zuul to only allow certain services regardless of the services registered in Eureka. This is done thru simple configuration.
+- However, we can customize Zuul internal behaviour. Zuul borrows the Servlet Filters concept from the Servlet specification. Every request is passed thru a number of filters and eventually the request is forwarded to destination, or not. The filters allow us to intercept requests at different stages: before the request is routed, after we receive a response from the destination service. There are special type of filters which we can use to override the routing logic.
 
-To create a zuul server we simply create one like this: (source code available under `labs\lab4`)
+### Build a Zuul server [Lab]
+
+The source code for this lab is available under `labs\lab4`. This lab relies on the previous lab3 artifacts, i.e. `cf-demo-app`, `eureka-server` (if you run it locally else Eureka from SCS) and `config-server` (if you run it locally else Config server from SCS). It also relies on the configuration file `demo-gateway.yml` in the configuration repository.
+
+1. To create a Zuul server we simply create one like this:
 ```
 @EnableZuulProxy
 @SpringBootApplication
@@ -386,7 +389,7 @@ public class GatewayServiceApplication {
 	}
 }
 ```
-We implement our own filter which keeps track of number of requests per service:
+2. We implement our own filter which keeps track of number of requests per service:
 ```
 class StatsCollector extends ZuulFilter {
 
@@ -434,14 +437,14 @@ class StatsCollector extends ZuulFilter {
 }
 ```
 
-And we configure it so that all requests must be prefixed with `/api` and we want to disable every eureka service except one called `securities-service` and the url is not the standard one `/api/securities-service/` but `/api/securities`.
+3. And we configure it so that all requests must be prefixed with `/api`. Also we want to disable every service registered with Eureka except our `cf-demo-app`. We can use a different name for our service in the URL. Instead of  `/api/demo/` but use `/api/demo-service`.
 ```
 
 zuul:
   prefix: /api
   ignored-services: '*'
   routes:
-    securities-service: /securities/**
+    demo: /demo-service/**
 ```    
 
-## 17:00 — 17:30 RabbitMQ Deployment and Best practices  &amp; [Q&A]
+4. Invoke the service several times (eg. `http://localhost:8082/api/demo-service/hello?name=Bob`) and check the metrics using the metrics endpoint `http://localhost:8082/metrics | jq '.["metrics.demo.requestCount"]' `.

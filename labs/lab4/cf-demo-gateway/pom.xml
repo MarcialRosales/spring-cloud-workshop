@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>io.pivotal.demo</groupId>
-	<artifactId>gateway-server</artifactId>
+	<artifactId>cf-demo-gateway</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>gateway-service</name>
+	<name>cf-demo-gatewaye</name>
 	<description>Demo project for Spring Boot</description>
 
 	<parent>

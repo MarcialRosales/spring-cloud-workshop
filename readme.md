@@ -200,7 +200,7 @@ Both apps have `spring.application.name` equals to `demo`.
 
 <a href="docs/SpringCloudConfigSlides.pdf">Slides</a>
 
-Very interesting talk about extending Configuration server <a href="https://www.infoq.com/presentations/config-server-security">Implementing Config Server and Extending It</a>
+Very interesting talk  <a href="https://www.infoq.com/presentations/config-server-security">Implementing Config Server and Extending It</a>
 
 ### Additional comments
 - We can store our credentials encrypted in the repo and Spring Config Server will decrypt them before delivering them to the client.

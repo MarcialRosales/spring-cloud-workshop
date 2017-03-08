@@ -26,6 +26,82 @@
 - Introduction to Spring Cloud and why it exists
 - Spring Cloud OSS and Spring Cloud Services (PCF Tile)
 
+## Spring Cloud Connectors
+
+Cloud-agnostic library used to retrieve cloud services. In this context, cloud services mean the credentials to access those cloud service. Following the 12-factors: [Store config in the environment](https://12factor.net/config) and [Treat backing services as attached resources](https://12factor.net/backing-services). It is an SPI-based library where each cloud provider (e.g. Pivotal or Heroku) provide their own implementation. This project consists of 2 main modules: the core which only retrieves credentials from the cloud and a *service connectors* library that creates Spring beans of the appropriate type based on the discovered services.
+
+In the next sections we will use some sample applications (labs/lab1 and labs/lab2) that declares the following dependencies in their pom.xml. This first dependency brings the *Connectors Core and Service Connectors* libraries (among others) and the second one brings the *Service Connectors for PCF*.
+```
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-dependencies</artifactId>
+  <version>Camden.SR4</version>
+  <type>pom</type>
+  <scope>import</scope>
+</dependency>
+<dependency>
+  <groupId>io.pivotal.spring.cloud</groupId>
+  <artifactId>spring-cloud-services-dependencies</artifactId>
+  <version>1.4.1.RELEASE</version>
+  <type>pom</type>
+  <scope>import</scope>
+</dependency>
+```
+
+The Cloud Foundry Connector discovers services bound to an application running in a Cloud Foundry environment. As it consumes bound service information in Cloud Foundry’s standard format, it is provider-agnostic; it currently is aware of application monitoring, DB2, MongoDB, MySQL, Oracle, PostgreSQL, RabbitMQ, Redis, SMTP, and SQL Server services.
+
+## Applications and Services
+
+### Consume Auto-configured Managed services
+Cloud Foundry provides extensive support for connecting a Spring application to services such as MySQL, PostgreSQL, MongoDB, Redis, and RabbitMQ. In many cases, Cloud Foundry can automatically configure a Spring application without any code changes. In this case, Cloud Foundry automatically re-configures the relevant bean definitions to bind them to cloud services.
+
+1. Create Mysql database service (managed service)
+  `cf create-service p-mysql pre-existing-plan flight-repository`
+2. Push application (with manifest, no jdbc driver)
+
+
+But Cloud Foundry auto-reconfigures applications only if the following items are true for your application:
+- Only one service instance of a given service type is bound to the application. In this context, different relational databases services are considered the same service type. For example, if both a MySQL and a PostgreSQL service are bound to the application, auto-reconfiguration does not occur.
+- Only one bean of a matching type is in the Spring application context. For example, you can have only one bean of type javax.sql.DataSource.
+
+### Consume Manually configured Managed services
+Use manual configuration if you have multiple services of a given type or you want to have more control over the configuration than auto-reconfiguration provides.
+
+We need to include the following dependency:
+```
+<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>
+				spring-boot-starter-cloud-connectors
+			</artifactId>
+```
+And add the logic that creates the `Datasource` in case of database services. The sample code shows how we can create a custom DataSource when we activate a profile.
+```
+@Configuration
+	@Profile("custom")
+	public class DataSourceConfig {
+		@Primary
+	    @Bean
+	    public DataSource dataSource() {
+	    	System.out.println("Created custom Datasource");
+	        CloudFactory cloudFactory = new CloudFactory();
+	        Cloud cloud = cloudFactory.getCloud();
+	        List<ServiceInfo> serviceIDs = cloud.getServiceInfos(DataSource.class);
+	        return cloud.getServiceConnector(serviceIDs.get(0).getId(), DataSource.class, null);
+	    }
+	}
+```      
+When we push this application, we need to activate the profile if we want to use the custom datasource.
+We either manually set it `cf set-env flight-availability SPRING_PROFILES_ACTIVE custom` or thru the manifest.yml.
+
+
+
+
+`cf set-env flight-availability SPRING_PROFILES_ACTIVE custom` or specify it in the manifest.yml.
+
+### Non-Managed services such as Oracle Database
+What happens if there is no service in the market place? Create CUPS and deal with it. Create a Cloud Connector Service Creator that is able to read the credentials from the CUPS.
+
 ## Service Registration and Discovery    [Lecture]
 
 <a href="docs/SpringCloudServiceDiscovery.pdf">Slides</a>

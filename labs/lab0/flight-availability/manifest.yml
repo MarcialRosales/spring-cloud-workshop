@@ -1,0 +1,10 @@
+applications:
+- name: flight-availability
+  instances: 1
+  memory: 1024M
+  host: flight-availability
+  path: target/flight-availability-0.0.1-SNAPSHOT.jar
+  services:
+  - flight-repository
+#  env:
+#    JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'

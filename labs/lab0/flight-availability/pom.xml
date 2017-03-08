@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.example</groupId>
+	<artifactId>flight-availability</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>flight-availability</name>
+	<description>Demo project for Spring Boot</description>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.4.4.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+	<properties>
+			<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>1.8</java.version>
+		</properties>
+
+		<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-actuator</artifactId>
+			
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>
+				spring-boot-starter-cloud-connectors
+			</artifactId>
+		</dependency>
+		</dependencies>
+
+	<build>
+		<resources>
+
+				<resource>
+		   			<directory>src/main/resources</directory>
+	       </resource>
+
+	      <resource>
+						<directory>${basedir}</directory>
+		        <filtering>true</filtering>
+		        <includes>
+		        	<include>manifest.yml</include>
+		        </includes>
+	   			<targetPath>${basedir}/target</targetPath>
+				</resource>
+
+		</resources>
+
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+
+	<profiles>
+     <profile>
+			 <activation>
+      	<activeByDefault>true</activeByDefault>
+    	</activation>
+       <repositories>
+         <repository>
+           <snapshots>
+             <enabled>false</enabled>
+           </snapshots>
+           <id>artifactory-local</id>
+           <name>libs-release</name>
+           <url>http://192.168.99.100:8081/artifactory/libs-release</url>
+         </repository>
+       </repositories>
+       <pluginRepositories>
+         <pluginRepository>
+           <snapshots>
+             <enabled>false</enabled>
+           </snapshots>
+           <id>artifactory-local</id>
+           <name>plugins-release</name>
+           <url>http://192.168.99.100:8081/artifactory/plugins-release</url>
+         </pluginRepository>
+       </pluginRepositories>
+       <id>artifactory</id>
+     </profile>
+   </profiles>
+
+
+</project>

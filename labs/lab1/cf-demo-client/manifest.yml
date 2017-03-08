@@ -14,4 +14,4 @@ applications:
 #env:
 #  SPRING_PROFILES_ACTIVE: pcf
 #  CF_TARGET: https://api.run-02.haas-40.pez.pivotal.io
-#  VERSION: 0.0.1
+#   VERSION: 0.0.1

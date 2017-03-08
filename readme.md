@@ -200,6 +200,7 @@ Both apps have `spring.application.name` equals to `demo`.
 
 <a href="docs/SpringCloudConfigSlides.pdf">Slides</a>
 
+Very interesting talk about extending Configuration server <a href="https://www.infoq.com/presentations/config-server-security">Implementing Config Server and Extending It</a>
 
 ### Additional comments
 - We can store our credentials encrypted in the repo and Spring Config Server will decrypt them before delivering them to the client.
@@ -259,10 +260,16 @@ we have to restage our application because we have modified the environment.
 We should have these configuration at the top :
 
 
+## Configuration Management - Dynamically reconfigure your application [Lab]
+
+### Dynamically changing settings at runtime in the application
+- Spring will automatically rebuild a `@Bean` which is either annotated as `@RefreshScope` or `@ConfigurationProperties`. Spring assumes that a `ConfigurationProperties` is something we most likely want to refresh if any of its settings change.
+- Spring will rebuild a bean when it receives a signal such as `RefreshRemoteApplicationEvent`. Spring config server sends this event to the application when it receives an event from the remote repo (via webhooks) or when it detects a change in the local filesystem -assuming we are using `native` repo.
+
 Note about Reloading configuration: This works provided you only have one instance. Ideally, we want to configure our config server to receive a callback from Github (webhooks onto the actuator endpoint `/monitor`) when a change occurs. The config server (if bundled with the jar `spring-cloud-config-monitor`).
 If we have more than one application instances you can still reload the configuration on all instances if you add the dependency `spring-cloud-starter-bus-amqp` to all the applications. It exposes a new endpoint called `/bus/refresh` . We would only need to go to reach one of the application instances and that instance will propagate the refresh request to all the other instances.
 
-One configuration most people want to dynamically change is the logging level. Exercise is to modify the code to add a logger and add the logging level the demo.yml or demo-production.yml :
+One configuration most people want to dynamically change is the logging level. An Exercise is to modify the code to add a logger and add the logging level the demo.yml or demo-production.yml :
 ```
 logging:
   level:
@@ -270,7 +277,20 @@ logging:
 
 ```
 
-### How to organize my application's configuration around the concept of a central repository
+## Configuration Management - Serving plain text [Lab]
+Sometimes we want to load other type of configuration files, for instance, an XML/YAML file that our application uses to define a set of business rules. whatever ...
+
+
+## Configuration Management - Resiliency [Lab]
+
+## Resiliency - What do we do if Config server is down?
+We can either fail fast which means our applications fail to start. PCF would try to deploy the application a few times before giving up.
+`spring.cloud.config.failFast=true`. Or if we can retry a few times before failing to start: `spring.cloud.config.failFast=false`, add the following dependencies to your project `spring-retry` and `spring-boot-starter-aop` and configure the retry mechanism via  `spring.cloud.config.retry.*`.
+
+What happens if Config server cannot connect to the remote repo? @TODO test it!
+
+
+## How to organize my application's configuration around the concept of a central repository [Lab]
 
 #### Get started very quickly with spring config server : local file system (no git repo required)
 ```

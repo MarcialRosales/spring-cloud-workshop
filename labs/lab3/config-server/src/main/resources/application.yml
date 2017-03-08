@@ -1,10 +1,13 @@
 server:
   port: 8888
 
-spring.profiles.active: native
+spring.profiles.active: remote, cloud
 
 spring:
   cloud:
+    bus:
+      enabled: true
+      
     config:
       server:
         git:
@@ -14,6 +17,15 @@ security:
   basic:
     enabled: false 
 
+
+---
+spring.profiles: remote
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/MarcialRosales/spring-cloud-workshop-config
 
 ---
 spring.profiles: secured

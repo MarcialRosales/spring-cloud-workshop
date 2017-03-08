@@ -13,11 +13,6 @@ import org.springframework.cloud.netflix.zuul.filters.RouteLocator;
 import org.springframework.context.annotation.Bean;
 
 import com.codahale.metrics.MetricRegistry;
-import com.netflix.client.config.IClientConfig;
-import com.netflix.loadbalancer.AbstractLoadBalancerRule;
-import com.netflix.loadbalancer.ILoadBalancer;
-import com.netflix.loadbalancer.IRule;
-import com.netflix.loadbalancer.Server;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 

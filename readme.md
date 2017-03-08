@@ -136,6 +136,8 @@ Note: Each attendee has its own account set up on this PCF foundation: https://a
 
   `cf services`
 
+  Make sure the service is ready. PCF provisions the services asynchronously.
+
 3. Go to the AppsManager and check the service. Check out the dashboard.
 
 **Deploy cf-demo-app in PCF**
@@ -153,7 +155,8 @@ Note: Each attendee has its own account set up on this PCF foundation: https://a
 
   `cf env cf-demo-app`
 
-  You will get something like this:
+  You will get something like this because we have stated in the `manifest.yml` that our application needs a service called `registry-service`. PCF takes care of injecting the credentials from the `registry-service` into the application's environment.
+
   ```
   {
    "VCAP_SERVICES": {
@@ -301,9 +304,10 @@ Go to the folder, labs/lab2 in the cloned git repo.
 2. Create a service instance
 `cf create-service -c '{"git": { "uri": "https://github.com/MarcialRosales/spring-cloud-workshop-config" }, "count": 1 }' p-config-server standard config-server`
 
+3. Make sure the service is available (`cf services`)
 3. Modify our application so that it has a `bootstrap.yml` rather than `application.yml`. We don't really need an `application.yml`. If we have one, Spring Config client will take that as the default properties of the application.
 
-4. Our repo already has our `demo.yml`. If we did not have our `spring.application.name`, the `spring-auto-configuration` jar injected by the java buildpack will automatically create a `spring.application.name` environment variable based on the env variable `VCAP_APPLICATION { ... "application_name": "cf-demo-app" ... }`.
+4. Our repo has already our `demo.yml`. If we did not have our the setting `spring.application.name`, the `spring-auto-configuration` jar injected by the java buildpack will automatically create a `spring.application.name` environment variable based on the env variable `VCAP_APPLICATION { ... "application_name": "cf-demo-app" ... }`.
 
 5. Push our `cf-demo-app`.
 
@@ -353,9 +357,9 @@ We should have these configuration at the top :
 - Spring will rebuild a bean when it receives a signal such as `RefreshRemoteApplicationEvent`. Spring config server sends this event to the application when it receives an event from the remote repo (via webhooks) or when it detects a change in the local filesystem -assuming we are using `native` repo.
 
 Note about Reloading configuration: This works provided you only have one instance. Ideally, we want to configure our config server to receive a callback from Github (webhooks onto the actuator endpoint `/monitor`) when a change occurs. The config server (if bundled with the jar `spring-cloud-config-monitor`).
-If we have more than one application instances you can still reload the configuration on all instances if you add the dependency `spring-cloud-starter-bus-amqp` to all the applications. It exposes a new endpoint called `/bus/refresh` . We would only need to go to reach one of the application instances and that instance will propagate the refresh request to all the other instances.
+If we have more than one application instances you can still reload the configuration on all instances if you add the dependency `spring-cloud-starter-bus-amqp` to all the applications. It exposes a new endpoint called `/bus/refresh` . If we call that endpoint in one of the application instances, it propagates a refresh request to other instances.
 
-One configuration most people want to dynamically change is the logging level. An Exercise is to modify the code to add a logger and add the logging level the demo.yml or demo-production.yml :
+Logging level is the most common settings we want to adjust at runtime. An Exercise is to modify the code to add a logger and add the logging level the demo.yml or demo-production.yml :
 ```
 logging:
   level:

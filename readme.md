@@ -277,11 +277,6 @@ logging:
 
 ```
 
-## Configuration Management - Serving plain text [Lab]
-Sometimes we want to load other type of configuration files, for instance, an XML/YAML file that our application uses to define a set of business rules. whatever ...
-
-
-## Configuration Management - Resiliency [Lab]
 
 ## Resiliency - What do we do if Config server is down?
 We can either fail fast which means our applications fail to start. PCF would try to deploy the application a few times before giving up.

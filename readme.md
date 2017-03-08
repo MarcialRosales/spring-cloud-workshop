@@ -48,33 +48,74 @@ And the second part of the lab is to push our 2 applications to PCF and use PCF 
 
 ### Set up
 
-1. You will need JDK 8, Maven and STS. If you don't use STS, you need to go to <a href="http://start.spring.io/">Spring Initilizr</a> to create your projects.
+1. You will need JDK 8, Maven and git. We will use the command line to launch the apps (`mvn spring-boot:run or java -jar`).
 2. git clone https://github.com/MarcialRosales/spring-cloud-workshop
 
 ### Standalone Service Discovery
 
-Go to the folder, labs/lab1 in the cloned git repo.
+Go to the folder, `labs/lab1` in the cloned git repo.
 
 1. Run eureka-server (from STS boot dashboard or from command line)
-2. Go to the eureka-server url:
-`http://localhost:8761/`
+2. Go to the eureka-server url. This is the default eureka-server URL if we don't specify any.
+`http://localhost:8761/`   
 3. Run cf-demo-app
-4. Check that our application registered with Eureka via the Eureka Dashboard
+4. Check that our application registered with Eureka via the Eureka Dashboard.
 5. Check that our app works
 `curl localhost:8080/hello?name=Marcial`
 6. Run cf-demo-client
 7. Check that our application works, i.e. it automatically discover our demo app by its name and not by its url.
-`curl localhost:8081/hi?name=Bob`
+
+  `curl localhost:8081/hi?name=Bob`
+
+  If we look at the source code `CfDemoClientApplication.ServiceInstanceRestController` we can see that we are using `http://demo/` as the base url when the real url is `http://localhost:8080`.
+  ```
+      ...
+     @RequestMapping("/hi")
+     public String hi(@RequestParam(defaultValue = "nobody") String name) {
+       return restTemplate.exchange("http://demo/hello?name={name}",
+         HttpMethod.GET, null,
+         String.class, name).getBody();
+
+     }
+     ...
+  ```
+
+  The magic is provided by the annotation `@LoadBalanced` applied to a `RestTemplate` bean.
+  ```
+      @Bean
+      @LoadBalanced   
+      public RestTemplate restTemplate() {
+      	return new RestTemplate();
+      }
+  ```
+  The RestTemplate bean will be intercepted and auto-configured by Spring Cloud to use a custom HttpRequestClient that uses Netflix Ribbon to do the application lookup. Ribbon is also a load-balancer so if you have multiple instances of a service available, it picks one for you.
+  The loadBalancer takes the logical service-name (as registered with the discovery-server) and converts it to the actual hostname of the chosen application.
+
 8. Check that our application can discover services using the `DiscoveryClient` api.
-`curl localhost:8081/service-instances/demo | jq .``
+
+  `curl localhost:8081/service-instances/demo | jq .`
 
 9. stop the cf-demo-app
 10. Check that it disappears from eureka but it is still visible to the client app.
-`curl localhost:8081/service-instances/demo | jq .`
-After 30 seconds it will disappear. This is because the client queries eureka every 30 seconds for a delta on what has happened since the last query.
+
+  `curl localhost:8081/service-instances/demo | jq .`
+
+  After 30 seconds it will disappear. This is because the client queries eureka every 30 seconds for a delta on what has happened since the last query.
 
 11. stop eureka server, check in the logs of the demo app exceptions. Start the eureka server, and see that the service is restored, run to check it out:
-`curl localhost:8081/service-instances/demo | jq .`
+
+  `curl localhost:8081/service-instances/demo | jq .`
+
+Bonus labs:
+- Run an additional instance of cf-demo-app (e.g. `mvn spring-boot:run -Dserver.port=9000`). Check Eureka dashboard and  `curl localhost:8081/service-instances/demo | jq .`. We should see 2 instances listed for DEMO app.
+- See the `instanceId` attribute of each instance in `curl localhost:8081/service-instances/demo | jq .`. See that both instances have the same value `DEMO`. We can configure each instance with a unique identifier:
+```
+eureka:
+  instance:
+    metadataMap:
+      instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+```
+To run multiple instances of the same application (for load-balancing and resilience) they need to register with a unique id with the Registry Service. You will see that when we use Spring Cloud Connectors, Spring provides an unique identifier: `<appName>:<instanceIdentifier provided by PCF>`
 
 We know our application works, we can push it to the cloud.
 
@@ -82,38 +123,83 @@ We know our application works, we can push it to the cloud.
 
 Note: Each attendee has its own account set up on this PCF foundation: https://apps.run-02.haas-40.pez.pivotal.io
 
+**Create Eureka or Service Registry in PCF**
+
 1. login
 `cf login -a https://api.run-02.haas-40.pez.pivotal.io --skip-ssl-validation`
 
 2. create service (http://docs.pivotal.io/spring-cloud-services/service-registry/creating-an-instance.html)
 
-`cf marketplace -s p-service-registry`
-`cf create-service p-service-registry standard registry-service`
+  `cf marketplace -s p-service-registry`
 
-3. update manifest.yml (host, and CF_TARGET)
-4. push the application
-`cf push`
+  `cf create-service p-service-registry standard registry-service`
 
-5. Check the app is working
-`curl cf-demo-app.cfapps-02.haas-40.pez.pivotal.io/hello?name=Marcial`
+  `cf services`
 
-6. Go to the Admin page of the registry-service and check that our service is there
+3. Go to the AppsManager and check the service. Check out the dashboard.
 
-7. Now we install our client application
-8. update manifest.yml (host, and CF_TARGET)
-9. push the application
+**Deploy cf-demo-app in PCF**
 
-10. Check the app is working
-`cf-demo-client.cfapps-02.haas-40.pez.pivotal.io/hi?name=Marcial`
+1. update manifest.yml (rename the host : eg. `yourname-cf-app-demo`, or `cf-app-demo-${random-word}`. )
+2. push the application (check out url, domain)
 
-11. Check that our app is not actually registered with Eureka however it has discovered our `demo` app.
+  `cf push`
 
-12. We can rely on RestTemplate to automatically resolve a service-name to a url. But we can also use the Discovery API to get their urls.
+3. Check the app is working
+
+  `curl cf-demo-app.cfapps-02.haas-40.pez.pivotal.io/hello?name=Marcial`
+
+4. Check the credentials PCF has injected into our application
+
+  `cf env cf-demo-app`
+
+  You will get something like this:
+  ```
+  {
+   "VCAP_SERVICES": {
+    "p-service-registry": [
+     {
+      "credentials": {
+       "access_token_uri": "https://p-spring-cloud-services.uaa.system-dev.chdc20-cf.pez.com/oauth/token",
+       "client_id": "p-service-registry-XXXXXXXX",
+       "client_secret": "XXXXXXX",
+       "uri": "https://eureka-044ac701-7919-4373-ad76-bdd0743fd813.apps-dev.chdc20-cf.pez.com"
+      },
+      "label": "p-service-registry",
+      "name": "registry-service",
+      "plan": "standard",
+      "provider": null,
+      "syslog_drain_url": null,
+      "tags": [
+       "eureka",
+       "discovery",
+       "registry",
+       "spring-cloud"
+      ],
+      "volume_mounts": []
+     }
+    ]
+   }
+  }
+  ```
+  Thanks to a Spring project called [Spring Cloud Connectors ](http://cloud.spring.io/spring-cloud-connectors/) and [Spring Cloud Connectors for Cloud Foundry](http://cloud.spring.io/spring-cloud-connectors/spring-cloud-cloud-foundry-connector.html), Spring Cloud Eureka is configured from the VCAP_SERVICES. If you want to know how you can start looking at [here](https://github.com/pivotal-cf/spring-cloud-services-connector/blob/master/spring-cloud-services-cloudfoundry-connector/src/main/java/io/pivotal/spring/cloud/cloudfoundry/EurekaServiceInfoCreator.java)
+
+4. Go to the Dashboard  of the registry-service and check that our service is there
+5. Scale the app to 2 instances. Check the dashboard.
+
+**Deploy cf-demo-client in PCF**
+
+1. install our client application
+2. update manifest.yml (host)
+3. push the application
+4. Check the app is working
+
+  `cf-demo-client.cfapps-02.haas-40.pez.pivotal.io/hi?name=Marcial`
+5. Check that our app is not actually registered with Eureka however it has discovered our `demo` app. Also, see the instanceId shown in the Registry's dashboard.
+
+6. We can rely on RestTemplate to automatically resolve a service-name to a url. But we can also use the Discovery API to get their urls.
 `curl cf-demo-client.cfapps-02.haas-40.pez.pivotal.io/service-instances/demo | jq .`
 
-13. Comment out the annotation @LoadBalanced which decorates a RestTemplate with Ribbon capabilities so that we can use a service-name instead of a URL and push the app. you will see that the first request below but not the second one.
-`cf-demo-client.cfapps-02.haas-40.pez.pivotal.io/hi?name=Marcial`
-`curl cf-demo-client.cfapps-02.haas-40.pez.pivotal.io/service-instances/demo | jq .`
 
 ### Eureka and dependency on Jersey 1.19. Path to Jersey 2.0.
 
@@ -153,7 +239,7 @@ Go to the folder, labs/lab3 in the cloned git repo.
 {
  "access_token_uri": "https://p-spring-cloud-services.uaa.run.haas-35.pez.pivotal.io/oauth/token",
  "client_id": "p-service-registry-ce80e383-0691-4a0e-a48e-84df7035cb2e",
- "client_secret": "WGE829u3U7qt",
+ "client_secret": "XXXXXXXX",
  "uri": "https://eureka-c890fdd0-18b5-4c5b-bc44-89ef2383dc08.cfapps.haas-35.pez.pivotal.io"
 }
 ```
@@ -198,14 +284,14 @@ Both apps have `spring.application.name` equals to `demo`.
 
 ## 15:45 — 17:00 Configuration Management [Lecture]
 
-<a href="docs/SpringCloudConfigSlides.pdf">Slides</a>
+[Slides](docs/SpringCloudConfigSlides.pdf)
 
-Very interesting talk  <a href="https://www.infoq.com/presentations/config-server-security">Implementing Config Server and Extending It</a>
+Very interesting talk  [Implementing Config Server and Extending It](https://www.infoq.com/presentations/config-server-security)
 
 ### Additional comments
 - We can store our credentials encrypted in the repo and Spring Config Server will decrypt them before delivering them to the client.
 - Spring Config Service (PCF Tile) does not support server-side decryption. Instead, we have to configure our client to do it. For that we need to make sure that the java buildpack is configured with `Java Cryptography Extension (JCE) Unlimited Strength policy files`. For further details check out the <a href="http://docs.pivotal.io/spring-cloud-services/config-server/writing-client-applications.html#use-client-side-decryption">docs</a>.
-
+- We should really use <a href="https://spring.io/blog/2016/06/24/managing-secrets-with-vault">Spring Cloud Vault</a> integrated with Spring Config Server to retrieve secrets.
 
 ## 15:45 — 17:00 Configuration Management  [Lab]
 Go to the folder, labs/lab2 in the cloned git repo.
